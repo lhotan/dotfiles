@@ -1,0 +1,71 @@
+#+TITLE: My Emacs Config
+#+AUTHOR: Michal Lhoťan
+#+PROPERTY: header-args :tangle ./out/emacs
+
+This config will hopefully grow a lot in the future. I really want to get
+more into Emacs, the best way to do that is to create my own config!
+
+* Absolute necessities
+  Here we require the package dependency, add melpa and refresh packages
+#+begin_src emacs-lisp
+(require 'package)
+(add-to-list 'package-archives
+	     '("melpa" . "https://melpa.org/packages/"))
+(package-initialize)
+(package-refresh-contents)
+
+(unless (package-installed-p 'use-package)
+    (package-install 'use-package))
+(require 'use-package)
+(setq use-package-always-ensure t)
+#+end_src
+
+* EVIL
+  Just sets up evil-mode
+#+begin_src emacs-lisp
+(unless (package-installed-p 'evil)
+  (package-install 'evil))
+
+(require 'evil)
+(evil-mode 1)
+#+end_src
+
+* HELM
+  Set up helm for better command search.
+#+begin_src emacs-lisp
+(use-package helm
+       :diminish
+       :bind (("M-x" . helm-M-x))
+       :config
+       (helm-mode 1))
+#+end_src
+
+* Global Keybinds
+  Set up global keybinds for things like invoking helm and such
+#+begin_src emacs-lisp
+(defun add-to-map(keys func)
+  "Add a keybinding in evil mode from keys to func."
+  (define-key evil-normal-state-map (kbd keys) func)
+  (define-key evil-motion-state-map (kbd keys) func))
+
+(add-to-map "<SPC>" nil)
+(add-to-map "<SPC> <SPC>" 'helm-M-x)
+(global-set-key (kbd "<escape>") 'keyboard-escape-quit)
+#+end_src
+
+* EXWM
+  Won't be needing this for a while, should probably just disable it
+#+begin_src emacs-lisp :tangle no
+(add-to-list 'load-path "/home/lhotan/repos/xelb/")
+(add-to-list 'load-path "/home/lhotan/repos/exwm/")
+
+
+(require 'exwm)
+(require 'exwm-config)
+(require 'exwm-systemtray)
+
+(exwm-systemtray-enable)
+
+(exwm-config-example)
+#+end_src
+

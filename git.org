@@ -1,0 +1,22 @@
+#+TITLE: My Git Config
+#+AUTHOR: Michal Lhoťan
+
+#+begin_src conf :tangle ./out/gitconfig
+[user]
+  name = lhotan
+  email = lhotan.michal@email.cz
+[core]
+  editor = nvim
+[merge]
+  ff = false
+[pull]
+  ff = only 
+[includeIf "gitdir:~/Projects/Seznam/"]
+  path = ~/dotfiles/out/gitconfig-seznam
+#+end_src
+
+#+begin_src conf :tangle ./out/gitconfig-seznam
+[user]
+  name = michal.lhotan
+  email = michal.lhotan@firma.seznam.cz
+#+end_src
