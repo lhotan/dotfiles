@@ -159,6 +159,15 @@ Ivy is an excellent completion framework for Emacs. It provides a minimal yet po
   (prescient-persist-mode 1)
   (ivy-prescient-mode 1))
 #+end_src
+* ORG
+#+begin_src emacs-lisp
+(use-package org-bullets
+  :custom
+  (org-bullets-bullet-list '("◉" "☯" "○" "☯" "✸" "☯" "✿" "☯" "✜" "☯" "◆" "☯" "▶"))
+  (org-ellipsis "⤵")
+  :hook (org-mode . org-bullets-mode))
+#+end_src
+
 * EXWM
   Won't be needing this for a while, should probably just disable it
 #+begin_src emacs-lisp :tangle no
