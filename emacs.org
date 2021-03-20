@@ -5,296 +5,309 @@
 This config will hopefully grow a lot in the future. I really want to get
 more into Emacs, the best way to do that is to create my own config!
 
-* Startup perfomance
-#+begin_src emacs-lisp
-(setq gc-cons-threshold (* 50 1000 1000))
+* Basic setup
+** Measure startup performance
+   Set higher GC threshold to prevent many GC invocations at startup (GC is slow).
+   Print startup time into messages.
+   #+begin_src emacs-lisp
+     (setq gc-cons-threshold (* 50 1000 1000))
 
-(defun efs/display-startup-time ()
-  (message "Emacs loaded in %s with %d garbage collections."
-    (format "%.2f seconds"
-      (float-time
-        (time-subtract after-init-time before-init-time)))
-     gcs-done))
+     (defun efs/display-startup-time ()
+       (message "Emacs loaded in %s with %d garbage collections."
+		(format "%.2f seconds"
+			(float-time
+			 (time-subtract after-init-time before-init-time)))
+		gcs-done))
 
-(add-hook 'emacs-startup-hook #'efs/display-startup-time)
-#+end_src
+     (add-hook 'emacs-startup-hook #'efs/display-startup-time)
+   #+end_src
+** Package repositories and use-package
+   Setup package archives and install ~use-package~
+   #+begin_src emacs-lisp
+     (require 'package)
 
-* Absolute necessities, packages
-  Here we require the package dependency, add melpa and refresh packages
-#+begin_src emacs-lisp
-(require 'package)
+     (setq package-archives '(("melpa" . "https://melpa.org/packages/")
+			      ("org" . "https://orgmode.org/elpa/")
+			      ("elpa" . "https://elpa.gnu.org/packages/")))
+     (package-initialize)
+     (unless package-archive-contents
+       (package-refresh-contents))
 
-(setq package-archives '(("melpa" . "https://melpa.org/packages/")
-                        ("org" . "https://orgmode.org/elpa/")
-			("elpa" . "https://elpa.gnu.org/packages/")))
-(package-initialize)
-(unless package-archive-contents
-  (package-refresh-contents))
+     (unless (package-installed-p 'use-package)
+       (package-install 'use-package))
 
-(unless (package-installed-p 'use-package)
-    (package-install 'use-package))
+     (require 'use-package)
+     (setq use-package-always-ensure t)
+   #+end_src
 
-(require 'use-package)
-(setq use-package-always-ensure t)
-#+end_src
+   Use the no-littering package to prevent Emacs from littering.
 
-Use the no-littering package to prevent Emacs from littering.
+   #+begin_src emacs-lisp
+     (use-package no-littering)
 
-#+begin_src emacs-lisp
-(use-package no-littering)
+     ;; no-littering doesn't set this by default so we must place
+     ;; auto save files in the same path as it uses for sessions
+     (setq auto-save-file-name-transforms
+	   `((".*" ,(no-littering-expand-var-file-name "auto-save/") t)))
 
-;; no-littering doesn't set this by default so we must place
-;; auto save files in the same path as it uses for sessions
-(setq auto-save-file-name-transforms
-      `((".*" ,(no-littering-expand-var-file-name "auto-save/") t)))
+     ;; package for hiding non-useful modes
+     (use-package diminish)
+   #+end_src
 
-;; package for hiding non-useful modes
-(use-package diminish)
-#+end_src
+* Make Emacs useable 
+** Make Emacs more modern and minimalistic.
+   Remove useless things such as scrollbar, toolbar and menu-bar.
+   #+begin_src emacs-lisp
+     (scroll-bar-mode -1)
+     (tool-bar-mode -1)
+     (menu-bar-mode -1)
+   #+end_src
+** Line numbers
+   Enable global line mode and then disable it in some specific modes. 
+   #+begin_src emacs-lisp
+     (column-number-mode)
+     (global-display-line-numbers-mode t)
 
-* UI Configuration
-Make Emacs more modern and minimalistic.
+     ;; disable lines for some modes
+     (dolist (mode '(org-mode-hook
+		     term-mode-hook
+		     shell-mode-hook
+		     treemacs-mode-hook
+		     eshell-mode-hook
+		     vterm-mode-hook))
+       (add-hook mode (lambda () (display-line-numbers-mode 0))))
+   #+end_src
+** Fonts 
+   I want to use Fira Code for everything, it's nice.
+   #+begin_src emacs-lisp
+     (set-face-attribute 'fixed-pitch nil :font "Fira Code Retina")
+   #+end_src
+** Evil mode
+   Evil mode is essential, enough said.
+   #+begin_src emacs-lisp
+     (use-package evil
+       :init
+       (setq evil-want-integration t)
+       (setq evil-want-keybinding nil)
+       (setq evil-want-C-u-scroll t)
+       (setq evil-want-C-i-jump nil)
+       :config
+       (evil-mode 1))
+   #+end_src
+   Install evil collection for more goodies and integrations.
+   #+begin_src emacs-lisp
+     (use-package evil-collection 
+       :config
+       (evil-collection-init))
+   #+end_src
 
-#+begin_src emacs-lisp
-(scroll-bar-mode -1)
-(tool-bar-mode -1)
+** Doom modeline
+   Use the modeline from doom-emacs, it looks good and integrates
+   with a lot of packages.
+   #+begin_src emacs-lisp
+     (use-package doom-modeline
+       :config 
+       (doom-modeline-mode))
+   #+end_src
 
-(menu-bar-mode -1)
+* Keybinds
+** Essentials 
+   #+begin_src emacs-lisp
+     ;; set esc to quit prompts
+     (global-set-key (kbd "<escape>") 'keyboard-escape-quit)
+     (setq mac-option-modifier nil)
+     (setq mac-command-modifier 'meta)
 
-(column-number-mode)
-(global-display-line-numbers-mode t)
+     (defun add-to-map(keys func)
+       "Add a keybinding in evil mode from keys to func."
+       (define-key evil-normal-state-map (kbd keys) func)
+       (define-key evil-motion-state-map (kbd keys) func))
 
-;; disable lines for some modes
-(dolist (mode '(org-mode-hook
-                term-mode-hook
-		shell-mode-hook
-		treemacs-mode-hook
-		eshell-mode-hook
-		vterm-mode-hook))
-  (add-hook mode (lambda () (display-line-numbers-mode 0))))
+     (add-to-map "<SPC>" nil)
+     (add-to-map "<SPC> <SPC>" 'counsel-M-x)
 
-(set-face-attribute 'fixed-pitch nil :font "Fira Code Retina")
-#+end_src
+     (add-to-map "<SPC> b b" 'counsel-switch-buffer)
+   #+end_src
+** Window numbers
+   Install winum to show window numbers.
+   #+begin_src emacs-lisp
+     (use-package winum
+       :config
+       (winum-mode))
+   #+end_src
 
-* Global Keybinds
+   Set up keybindings for switching between windows.
 
-Set up global keybinds for things like invoking helm and such
+   #+begin_src emacs-lisp
+     (add-to-map "<SPC> 1" 'winum-select-window-1)
+     (add-to-map "<SPC> 2" 'winum-select-window-2)
+     (add-to-map "<SPC> 3" 'winum-select-window-3)
+     (add-to-map "<SPC> 4" 'winum-select-window-4)
+     (add-to-map "<SPC> 5" 'winum-select-window-5)
+   #+end_src
+** Which key
+   which-key is really useful for discovering new features of the editor.
+   #+begin_src emacs-lisp
+     (use-package which-key
+       :defer 0
+       :diminish which-key-mode
+       :config
+       (setq which-key-idle-delay 0.5) 
+       (which-key-mode))
 
-#+begin_src emacs-lisp
-;; set esc to quit prompts
-(global-set-key (kbd "<escape>") 'keyboard-escape-quit)
-(setq mac-option-modifier nil)
-(setq mac-command-modifier 'meta)
- 
-(use-package evil
-  :init
-  (setq evil-want-integration t)
-  (setq evil-want-keybinding nil)
-  (setq evil-want-C-u-scroll t)
-  (setq evil-want-C-i-jump nil)
-  :config
-  (evil-mode 1))
+     (which-key-add-keymap-based-replacements evil-normal-state-map
+       "<SPC> <SPC>" '("M-x") 
+       "<SPC> b" '("Buffer")
+       "<SPC> b b" '("switcher")
+       "<SPC> g" '("Git"))  
 
-(use-package evil-collection
-  :after evil
-  :config
-  (evil-collection-init))
+   #+end_src
 
-(defun add-to-map(keys func)
-  "Add a keybinding in evil mode from keys to func."
-  (define-key evil-normal-state-map (kbd keys) func)
-  (define-key evil-motion-state-map (kbd keys) func))
+   Configure which-key window swap names
 
-(add-to-map "<SPC>" nil)
-(add-to-map "<SPC> <SPC>" 'counsel-M-x)
+   #+begin_src emacs-lisp
+     ;; Rename the entry for M-1 in the SPC h k Top-level bindings,
+     ;; and for 1 in the SPC- Spacemacs root, to 1..9
+     (push '(("\\(.*\\)1" . "winum-select-window-1") .
+	     ("\\11..9" . "select window"))
+	   which-key-replacement-alist)
 
-(add-to-map "<SPC> b b" 'counsel-switch-buffer)
-#+end_src
+     ;; Hide the entries for M-[2-9] in the SPC h k Top-level bindings,
+     ;; and for [2-9] in the SPC- Spacemacs root
+     (push '((nil . "winum-select-window-[2-9]") . t)
+	   which-key-replacement-alist)
+   #+end_src
+** Ivy
+   Ivy is an excellent completion framework for Emacs. It provides a minimal yet powerful selection menu that appears when you open files, switch buffers, and for many other tasks in Emacs.
+   #+begin_src emacs-lisp
+     (use-package ivy
+       :diminish
+       :bind (("C-s" . swiper)
+	      :map ivy-minibuffer-map
+	      ("TAB" . ivy-alt-done)
+	      ("C-l" . ivy-alt-done)
+	      ("C-j" . ivy-next-line)
+	      ("C-k" . ivy-previous-line)
+	      :map ivy-switch-buffer-map
+	      ("C-k" . ivy-previous-line)
+	      ("C-l" . ivy-done)
+	      ("C-d" . ivy-switch-buffer-kill)
+	      :map ivy-reverse-i-search-map
+	      ("C-k" . ivy-previous-line)
+	      ("C-d" . ivy-reverse-i-search-kill))
+       :config
+       (ivy-mode 1))
 
-* Which key
-which-key is really useful for discovering new features of the editor.
-#+begin_src emacs-lisp
-(use-package which-key
-  :defer 0
-  :diminish which-key-mode
-  :config
-  (setq which-key-idle-delay 0.5) 
-  (which-key-mode))
+     (setq ivy-use-virtual-buffers t)
+     (setq ivy-count-format "(%d/%d) ")
 
-(which-key-add-keymap-based-replacements evil-normal-state-map
-  "<SPC> <SPC>" '("M-x") 
-  "<SPC> b" '("Buffer")
-  "<SPC> b b" '("switcher")
-  "<SPC> g" '("Git"))  
+     (use-package ivy-rich
+       :diminish
+       :config
+       (ivy-rich-mode 1))
 
-#+end_src
+     (use-package counsel
+       :diminish
+       :bind (("C-M-j" . 'counsel-switch-buffer)
+	      :map minibuffer-local-map
+	      ("C-r" . 'counsel-minibuffer-history))
+       :custom
+       (counsel-linux-app-format-function #'counsel-linux-app-format-function-name-only)
+       :config
+       (counsel-mode 1))
 
-Configure which-key window swap names
-
-#+begin_src emacs-lisp
-;; Rename the entry for M-1 in the SPC h k Top-level bindings,
-;; and for 1 in the SPC- Spacemacs root, to 1..9
-(push '(("\\(.*\\)1" . "winum-select-window-1") .
-       ("\\11..9" . "select window"))
-       which-key-replacement-alist)
-
-;; Hide the entries for M-[2-9] in the SPC h k Top-level bindings,
-;; and for [2-9] in the SPC- Spacemacs root
-(push '((nil . "winum-select-window-[2-9]") . t)
-      which-key-replacement-alist)
-#+end_src
-* Ivy
-Ivy is an excellent completion framework for Emacs. It provides a minimal yet powerful selection menu that appears when you open files, switch buffers, and for many other tasks in Emacs.
-#+begin_src emacs-lisp
-(use-package ivy
-  :diminish
-  :bind (("C-s" . swiper)
-         :map ivy-minibuffer-map
-         ("TAB" . ivy-alt-done)
-         ("C-l" . ivy-alt-done)
-         ("C-j" . ivy-next-line)
-         ("C-k" . ivy-previous-line)
-         :map ivy-switch-buffer-map
-         ("C-k" . ivy-previous-line)
-         ("C-l" . ivy-done)
-         ("C-d" . ivy-switch-buffer-kill)
-         :map ivy-reverse-i-search-map
-         ("C-k" . ivy-previous-line)
-         ("C-d" . ivy-reverse-i-search-kill))
-  :config
-  (ivy-mode 1))
-
-(setq ivy-use-virtual-buffers t)
-(setq ivy-count-format "(%d/%d) ")
-
-(use-package ivy-rich
-  :diminish
-  :config
-  (ivy-rich-mode 1))
-
-(use-package counsel
-  :diminish
-  :bind (("C-M-j" . 'counsel-switch-buffer)
-         :map minibuffer-local-map
-         ("C-r" . 'counsel-minibuffer-history))
-  :custom
-  (counsel-linux-app-format-function #'counsel-linux-app-format-function-name-only)
-  :config
-  (counsel-mode 1))
-
-(use-package ivy-prescient
-  :after counsel
-  :custom
-  (ivy-prescient-enable-filtering nil)
-  :config
-  (prescient-persist-mode 1)
-  (ivy-prescient-mode 1))
-#+end_src
+     (use-package ivy-prescient
+       :after counsel
+       :custom
+       (ivy-prescient-enable-filtering nil)
+       :config
+       (prescient-persist-mode 1)
+       (ivy-prescient-mode 1))
+   #+end_src
 * ORG
-#+begin_src emacs-lisp
-(use-package org-bullets
-  :custom
-  (org-bullets-bullet-list '("◉" "☯" "○" "☯" "✸" "☯" "✿" "☯" "✜" "☯" "◆" "☯" "▶"))
-  (org-ellipsis "⤵")
-  :hook (org-mode . org-bullets-mode))
-#+end_src
+  #+begin_src emacs-lisp
+    (setq org-src-tab-acts-natively t)
+    (use-package org-bullets
+      :custom
+      (org-bullets-bullet-list '("◉" "☯" "○" "☯" "✸" "☯" "✿" "☯" "✜" "☯" "◆" "☯" "▶"))
+      (org-ellipsis "⤵")
+      :hook (org-mode . org-bullets-mode))
+  #+end_src
 
 * Window numbers
 
-Install winum to show window numbers.
-#+begin_src emacs-lisp
-(use-package winum
-  :config
-  (winum-mode))
-#+end_src
-
-Set up keybindings for switching between windows.
-
-#+begin_src emacs-lisp
-(add-to-map "<SPC> 1" 'winum-select-window-1)
-(add-to-map "<SPC> 2" 'winum-select-window-2)
-(add-to-map "<SPC> 3" 'winum-select-window-3)
-(add-to-map "<SPC> 4" 'winum-select-window-4)
-(add-to-map "<SPC> 5" 'winum-select-window-5)
-#+end_src
-
 * Modeline
-I'm going to use doom-modeline, it looks the best!
-#+begin_src emacs-lisp
-(use-package doom-modeline
-  :config 
-  (doom-modeline-mode))
-#+end_src
+  I'm going to use doom-modeline, it looks the best!
 
 * Vterm
 
-Superior terminal emulator for emacs.
+  Superior terminal emulator for emacs.
 
-#+begin_src emacs-lisp
-(use-package vterm
-  :ensure t)
+  #+begin_src emacs-lisp
+    (use-package vterm
+      :ensure t)
 
-(add-to-map "<SPC> '" 'vterm)
-#+end_src
+    (add-to-map "<SPC> '" 'vterm)
+  #+end_src
 * Magit
-#+begin_src emacs-lisp
-(use-package magit)
+  #+begin_src emacs-lisp
+    (use-package magit)
 
-(add-to-map "<SPC> g s" 'magit-status)
-(add-to-map "<SPC> g m" 'magit-dispatch)
-#+end_src
+    (add-to-map "<SPC> g s" 'magit-status)
+    (add-to-map "<SPC> g m" 'magit-dispatch)
+  #+end_src
 * Dashboard
-#+begin_src emacs-lisp
-(use-package dashboard
-  :ensure t
-  :config
-  (dashboard-setup-startup-hook))
-#+end_src
+  #+begin_src emacs-lisp
+    (use-package dashboard
+      :ensure t
+      :config
+      (dashboard-setup-startup-hook))
+  #+end_src
 * EXWM
   Won't be needing this for a while, should probably just disable it
-#+begin_src emacs-lisp :tangle no
-(add-to-list 'load-path "/home/lhotan/repos/xelb/")
-(add-to-list 'load-path "/home/lhotan/repos/exwm/")
+  #+begin_src emacs-lisp :tangle no
+    (add-to-list 'load-path "/home/lhotan/repos/xelb/")
+    (add-to-list 'load-path "/home/lhotan/repos/exwm/")
 
 
-(require 'exwm)
-(require 'exwm-config)
-(require 'exwm-systemtray)
+    (require 'exwm)
+    (require 'exwm-config)
+    (require 'exwm-systemtray)
 
-(exwm-systemtray-enable)
+    (exwm-systemtray-enable)
 
-(exwm-config-example)
-#+end_src
+    (exwm-config-example)
+  #+end_src
 
 
 
 * LSP
-#+begin_src emacs-lisp
-(use-package lsp-mode)
-(use-package lsp-ui)
-(use-package flycheck
-  :ensure t
-  :init (global-flycheck-mode))
-(use-package company
-  :hook (after-init-hook . global-company-mode))
+  #+begin_src emacs-lisp
+    (use-package lsp-mode)
+    (use-package lsp-ui)
+    (use-package flycheck
+      :ensure t
+      :init (global-flycheck-mode))
+    (use-package company
+      :hook (after-init-hook . global-company-mode))
 
-(use-package web-mode)
-;; tide
+    (use-package web-mode)
+    ;; tide
 
-(use-package tide
-  :ensure t
-  :after (typescript-mode company flycheck)
-  :hook ((typescript-mode . tide-setup)
-         (typescript-mode . tide-hl-identifier-mode)
-         (before-save . tide-format-before-save)))
-#+end_src
+    (use-package tide
+      :ensure t
+      :after (typescript-mode company flycheck)
+      :hook ((typescript-mode . tide-setup)
+	     (typescript-mode . tide-hl-identifier-mode)
+	     (before-save . tide-format-before-save)))
+  #+end_src
 
 
 
 
 
 * AFTER INIT
-#+begin_src emacs-lisp
-;; Make gc pauses faster by decreasing the threshold.
-(setq gc-cons-threshold (* 2 1000 1000))
-#+end_src
+  #+begin_src emacs-lisp
+    ;; Make gc pauses faster by decreasing the threshold.
+    (setq gc-cons-threshold (* 2 1000 1000))
+  #+end_src
