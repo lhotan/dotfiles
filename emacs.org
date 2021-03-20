@@ -291,3 +291,10 @@ Superior terminal emulator for emacs.
 
 
 
+
+
+* AFTER INIT
+#+begin_src emacs-lisp
+;; Make gc pauses faster by decreasing the threshold.
+(setq gc-cons-threshold (* 2 1000 1000))
+#+end_src
