@@ -7,7 +7,6 @@ more into Emacs, the best way to do that is to create my own config!
 
 * Startup perfomance
 #+begin_src emacs-lisp
-;; The default is 800 kilobytes.  Measured in bytes.
 (setq gc-cons-threshold (* 50 1000 1000))
 
 (defun efs/display-startup-time ()
@@ -57,8 +56,6 @@ Use the no-littering package to prevent Emacs from littering.
 Make Emacs more modern and minimalistic.
 
 #+begin_src emacs-lisp
-(setq inhibit-startup-message t)
-
 (scroll-bar-mode -1)
 (tool-bar-mode -1)
 
@@ -246,6 +243,13 @@ Superior terminal emulator for emacs.
 (add-to-map "<SPC> g s" 'magit-status)
 (add-to-map "<SPC> g m" 'magit-dispatch)
 #+end_src
+* Dashboard
+#+begin_src emacs-lisp
+(use-package dashboard
+  :ensure t
+  :config
+  (dashboard-setup-startup-hook))
+#+end_src
 * EXWM
   Won't be needing this for a while, should probably just disable it
 #+begin_src emacs-lisp :tangle no
@@ -261,4 +265,29 @@ Superior terminal emulator for emacs.
 
 (exwm-config-example)
 #+end_src
+
+
+
+* LSP
+#+begin_src emacs-lisp
+(use-package lsp-mode)
+(use-package lsp-ui)
+(use-package flycheck
+  :ensure t
+  :init (global-flycheck-mode))
+(use-package company
+  :hook (after-init-hook . global-company-mode))
+
+(use-package web-mode)
+;; tide
+
+(use-package tide
+  :ensure t
+  :after (typescript-mode company flycheck)
+  :hook ((typescript-mode . tide-setup)
+         (typescript-mode . tide-hl-identifier-mode)
+         (before-save . tide-format-before-save)))
+#+end_src
+
+
 
