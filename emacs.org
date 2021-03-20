@@ -5,6 +5,21 @@
 This config will hopefully grow a lot in the future. I really want to get
 more into Emacs, the best way to do that is to create my own config!
 
+* Startup perfomance
+#+begin_src emacs-lisp
+;; The default is 800 kilobytes.  Measured in bytes.
+(setq gc-cons-threshold (* 50 1000 1000))
+
+(defun efs/display-startup-time ()
+  (message "Emacs loaded in %s with %d garbage collections."
+    (format "%.2f seconds"
+      (float-time
+        (time-subtract after-init-time before-init-time)))
+     gcs-done))
+
+(add-hook 'emacs-startup-hook #'efs/display-startup-time)
+#+end_src
+
 * Absolute necessities, packages
   Here we require the package dependency, add melpa and refresh packages
 #+begin_src emacs-lisp
@@ -57,7 +72,8 @@ Make Emacs more modern and minimalistic.
                 term-mode-hook
 		shell-mode-hook
 		treemacs-mode-hook
-		eshell-mode-hook))
+		eshell-mode-hook
+		vterm-mode-hook))
   (add-hook mode (lambda () (display-line-numbers-mode 0))))
 
 (set-face-attribute 'fixed-pitch nil :font "Fira Code Retina")
@@ -70,7 +86,9 @@ Set up global keybinds for things like invoking helm and such
 #+begin_src emacs-lisp
 ;; set esc to quit prompts
 (global-set-key (kbd "<escape>") 'keyboard-escape-quit)
-
+(setq mac-option-modifier nil)
+(setq mac-command-modifier 'meta)
+ 
 (use-package evil
   :init
   (setq evil-want-integration t)
@@ -93,7 +111,7 @@ Set up global keybinds for things like invoking helm and such
 (add-to-map "<SPC>" nil)
 (add-to-map "<SPC> <SPC>" 'counsel-M-x)
 
-(add-to-map "<SPC> b s" 'counsel-switch-buffer)
+(add-to-map "<SPC> b b" 'counsel-switch-buffer)
 #+end_src
 
 * Which key
@@ -107,11 +125,27 @@ which-key is really useful for discovering new features of the editor.
   (which-key-mode))
 
 (which-key-add-keymap-based-replacements evil-normal-state-map
-  "<SPC> <SPC>" '("find-command") 
-  "<SPC> b" '("buffer-actions")
-  "<SPC> b s" '("buffer-switcher"))  
+  "<SPC> <SPC>" '("M-x") 
+  "<SPC> b" '("Buffer")
+  "<SPC> b b" '("switcher")
+  "<SPC> g" '("Git"))  
+
 #+end_src
 
+Configure which-key window swap names
+
+#+begin_src emacs-lisp
+;; Rename the entry for M-1 in the SPC h k Top-level bindings,
+;; and for 1 in the SPC- Spacemacs root, to 1..9
+(push '(("\\(.*\\)1" . "winum-select-window-1") .
+       ("\\11..9" . "select window"))
+       which-key-replacement-alist)
+
+;; Hide the entries for M-[2-9] in the SPC h k Top-level bindings,
+;; and for [2-9] in the SPC- Spacemacs root
+(push '((nil . "winum-select-window-[2-9]") . t)
+      which-key-replacement-alist)
+#+end_src
 * Ivy
 Ivy is an excellent completion framework for Emacs. It provides a minimal yet powerful selection menu that appears when you open files, switch buffers, and for many other tasks in Emacs.
 #+begin_src emacs-lisp
@@ -168,6 +202,50 @@ Ivy is an excellent completion framework for Emacs. It provides a minimal yet po
   :hook (org-mode . org-bullets-mode))
 #+end_src
 
+* Window numbers
+
+Install winum to show window numbers.
+#+begin_src emacs-lisp
+(use-package winum
+  :config
+  (winum-mode))
+#+end_src
+
+Set up keybindings for switching between windows.
+
+#+begin_src emacs-lisp
+(add-to-map "<SPC> 1" 'winum-select-window-1)
+(add-to-map "<SPC> 2" 'winum-select-window-2)
+(add-to-map "<SPC> 3" 'winum-select-window-3)
+(add-to-map "<SPC> 4" 'winum-select-window-4)
+(add-to-map "<SPC> 5" 'winum-select-window-5)
+#+end_src
+
+* Modeline
+I'm going to use doom-modeline, it looks the best!
+#+begin_src emacs-lisp
+(use-package doom-modeline
+  :config 
+  (doom-modeline-mode))
+#+end_src
+
+* Vterm
+
+Superior terminal emulator for emacs.
+
+#+begin_src emacs-lisp
+(use-package vterm
+  :ensure t)
+
+(add-to-map "<SPC> '" 'vterm)
+#+end_src
+* Magit
+#+begin_src emacs-lisp
+(use-package magit)
+
+(add-to-map "<SPC> g s" 'magit-status)
+(add-to-map "<SPC> g m" 'magit-dispatch)
+#+end_src
 * EXWM
   Won't be needing this for a while, should probably just disable it
 #+begin_src emacs-lisp :tangle no
