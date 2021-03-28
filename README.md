@@ -1,3 +1,3 @@
 # dotfiles
 
-Just my personal configs 👍
+Just my personal config 👍
