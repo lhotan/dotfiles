@@ -54,6 +54,11 @@ more into Emacs, the best way to do that is to create my own config!
      (use-package diminish)
    #+end_src
 
+** My Emacs scripts
+   #+begin_src emacs-lisp
+   ;; my scripts
+   (load-file "~/dotfiles/me.el")
+   #+end_src
 * Make Emacs useable 
 ** Make Emacs more modern and minimalistic.
    Remove useless things such as scrollbar, toolbar and menu-bar.
@@ -77,10 +82,15 @@ more into Emacs, the best way to do that is to create my own config!
 		     vterm-mode-hook))
        (add-hook mode (lambda () (display-line-numbers-mode 0))))
    #+end_src
-** Fonts 
+** Fonts and icons 
    I want to use Fira Code for everything, it's nice.
    #+begin_src emacs-lisp
-     (set-face-attribute 'fixed-pitch nil :font "Fira Code Retina")
+     ;;(set-face-attribute 'fixed-pitch nil :font "Fira Code Retina")
+   #+end_src
+   All the icons for emacs, after installing package 
+   run M-X all-the-icons-install-fonts.  
+   #+begin_src emacs-lisp
+     (use-package all-the-icons)
    #+end_src
 ** Evil mode
    Evil mode is essential, enough said.
@@ -106,8 +116,8 @@ more into Emacs, the best way to do that is to create my own config!
    with a lot of packages.
    #+begin_src emacs-lisp
      (use-package doom-modeline
-       :config 
-       (doom-modeline-mode))
+       :ensure t 
+       :init (doom-modeline-mode 1))
    #+end_src
 
 * Keybinds
@@ -236,18 +246,16 @@ more into Emacs, the best way to do that is to create my own config!
 
 * Window numbers
 
-* Modeline
-  I'm going to use doom-modeline, it looks the best!
 
 * Vterm
 
   Superior terminal emulator for emacs.
 
   #+begin_src emacs-lisp
-    (use-package vterm
-      :ensure t)
+    ;;(use-package vterm
+    ;;  :ensure t)
 
-    (add-to-map "<SPC> '" 'vterm)
+    ;;(add-to-map "<SPC> '" 'vterm)
   #+end_src
 * Magit
   #+begin_src emacs-lisp
