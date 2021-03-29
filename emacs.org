@@ -67,6 +67,7 @@ more into Emacs, the best way to do that is to create my own config!
      (tool-bar-mode -1)
      (menu-bar-mode -1)
    #+end_src
+
 ** Line numbers
    Enable global line mode and then disable it in some specific modes. 
    #+begin_src emacs-lisp
@@ -82,6 +83,7 @@ more into Emacs, the best way to do that is to create my own config!
 		     vterm-mode-hook))
        (add-hook mode (lambda () (display-line-numbers-mode 0))))
    #+end_src
+
 ** Fonts and icons 
    I want to use Fira Code for everything, it's nice.
    #+begin_src emacs-lisp
@@ -92,6 +94,7 @@ more into Emacs, the best way to do that is to create my own config!
    #+begin_src emacs-lisp
      (use-package all-the-icons)
    #+end_src
+
 ** Evil mode
    Evil mode is essential, enough said.
    #+begin_src emacs-lisp
@@ -119,6 +122,16 @@ more into Emacs, the best way to do that is to create my own config!
        :ensure t 
        :init (doom-modeline-mode 1))
    #+end_src
+
+** Doom themes
+ Set up doom-themes, and use solarized 
+ #+begin_src emacs-lisp
+ (use-package doom-themes
+   :config
+   (load-theme 'doom-solarized-light t)
+  ;; Corrects (and improves) org-mode's native fontification.
+   (doom-themes-org-config))
+ #+end_src
 
 * Keybinds
 ** Essentials 
@@ -257,6 +270,7 @@ more into Emacs, the best way to do that is to create my own config!
 
     ;;(add-to-map "<SPC> '" 'vterm)
   #+end_src
+
 * Magit
   #+begin_src emacs-lisp
     (use-package magit)
@@ -264,6 +278,7 @@ more into Emacs, the best way to do that is to create my own config!
     (add-to-map "<SPC> g s" 'magit-status)
     (add-to-map "<SPC> g m" 'magit-dispatch)
   #+end_src
+
 * Dashboard
   #+begin_src emacs-lisp
     (use-package dashboard
@@ -271,6 +286,7 @@ more into Emacs, the best way to do that is to create my own config!
       :config
       (dashboard-setup-startup-hook))
   #+end_src
+
 * EXWM
   Won't be needing this for a while, should probably just disable it
   #+begin_src emacs-lisp :tangle no
@@ -319,3 +335,4 @@ more into Emacs, the best way to do that is to create my own config!
     ;; Make gc pauses faster by decreasing the threshold.
     (setq gc-cons-threshold (* 2 1000 1000))
   #+end_src
+  
