@@ -59,6 +59,13 @@ more into Emacs, the best way to do that is to create my own config!
    ;; my scripts
    (load-file "~/dotfiles/me.el")
    #+end_src
+** Use the same PATH as system on MacOS
+ #+begin_src emacs-lisp
+  (use-package exec-path-from-shell
+   :config
+   (when (memq window-system '(mac ns x))
+     (exec-path-from-shell-initialize)))
+ #+end_src
 * Make Emacs useable 
 ** Make Emacs more modern and minimalistic.
    Remove useless things such as scrollbar, toolbar and menu-bar.
@@ -128,7 +135,7 @@ more into Emacs, the best way to do that is to create my own config!
  #+begin_src emacs-lisp
  (use-package doom-themes
    :config
-   (load-theme 'doom-solarized-light t)
+   (load-theme 'doom-solarized-dark t)
   ;; Corrects (and improves) org-mode's native fontification.
    (doom-themes-org-config))
  #+end_src
@@ -306,29 +313,24 @@ more into Emacs, the best way to do that is to create my own config!
 
 
 * LSP
+
   #+begin_src emacs-lisp
-    (use-package lsp-mode)
-    (use-package lsp-ui)
+    (use-package lsp-mode
+      :init
+      :hook (
+             (css-mode . lsp)
+	     (js-mode . lsp)
+	     (lsp-mode . lsp-enable-which-key-integration))
+      :commands lsp)
+    (use-package lsp-ui :commands lsp-ui-mode)
+    (use-package lsp-ivy :commands lsp-ivy-workspace-symbol)
     (use-package flycheck
       :ensure t
-      :init (global-flycheck-mode))
+      :init (add-hook 'after-init-hook 'global-flycheck-mode))
     (use-package company
-      :hook (after-init-hook . global-company-mode))
+      :init (add-hook 'after-init-hook 'global-company-mode))
 
-    (use-package web-mode)
-    ;; tide
-
-    (use-package tide
-      :ensure t
-      :after (typescript-mode company flycheck)
-      :hook ((typescript-mode . tide-setup)
-	     (typescript-mode . tide-hl-identifier-mode)
-	     (before-save . tide-format-before-save)))
   #+end_src
-
-
-
-
 
 * AFTER INIT
   #+begin_src emacs-lisp

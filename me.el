@@ -13,5 +13,7 @@
   (me/copy-emacs-conf) 
   (load-file "~/.emacs.d/init.el"))
 
-(provide 'me)
 
+;; create symlink, this function also converts relative path to absolute, override
+(defun me/make-symbolic-link (source target)
+  (make-symbolic-link (expand-file-name source) (expand-file-name target) t))

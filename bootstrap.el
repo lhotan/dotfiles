@@ -10,4 +10,5 @@
 (org-babel-tangle-file "git.org")
 (org-babel-tangle-file "emacs.org")
 
-(me/copy-emacs-conf)
+(me/make-symbolic-link "~/dotfiles/out/gitconfig" "~/.gitconfig")
+(me/make-symbolic-link "~/dotfiles/out/emacs" "~/.emacs.d/init.el")
