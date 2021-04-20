@@ -294,6 +294,17 @@ more into Emacs, the best way to do that is to create my own config!
       (dashboard-setup-startup-hook))
   #+end_src
 
+* Projectile
+  Use Projectile to manage projects in Emacs.
+
+  #+begin_src emacs-lisp
+    (use-package projectile
+      :config
+      (projectile-mode +1))
+    ;; (define-key projectile-key-map (kbd "<SPC> p") 'projectile-command-map)
+  #+end_src
+  
+
 * EXWM
   Won't be needing this for a while, should probably just disable it
   #+begin_src emacs-lisp :tangle no
