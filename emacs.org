@@ -3,8 +3,8 @@
 #+PROPERTY: header-args :tangle ./out/emacs
 This config will hopefully grow a lot in the future. I really want to get
 more into Emacs, the best way to do that is to create my own config!
-
-* Basic setup ** Measure startup performance
+* Basic setup
+** Measure startup performance
    Set higher GC threshold to prevent many GC invocations at startup (GC is slow).
    Print startup time into messages.
    #+begin_src emacs-lisp
@@ -90,7 +90,7 @@ more into Emacs, the best way to do that is to create my own config!
    #+end_src
 ** Make startup window bigger
    #+begin_src emacs-lisp
-     (setq default-frame-alist '((left . 0) (width . 144) (height . 60)))
+     (setq default-frame-alist '((width . 144) (height . 60)))
    #+end_src
 
 ** Fonts and icons 
@@ -142,6 +142,17 @@ more into Emacs, the best way to do that is to create my own config!
    (doom-themes-org-config))
  #+end_src
 
+** Fix stupid tab behaviours in Emacs
+   #+begin_src emacs-lisp
+     (setq default-tab-width 2)
+     (setq indent-tabs-mode nil)
+     (setq indent-line-function 'insert-tab)
+     ;; make emacs delete entire tab when using backspace
+     (setq backward-delete-char-untabify-method 'hungry)
+     ;; disable indent of previous line when pressing enter
+     (setq-default electric-indent-inhibit t)
+
+   #+end_src
 * Keybinds
 ** Essentials 
    #+begin_src emacs-lisp
@@ -191,7 +202,8 @@ more into Emacs, the best way to do that is to create my own config!
        "<SPC> <SPC>" '("M-x") 
        "<SPC> b" '("Buffer")
        "<SPC> b b" '("switcher")
-       "<SPC> g" '("Git"))  
+       "<SPC> g" '("Git")
+       "<SPC> p" '("Projectile"))  
 
    #+end_src
 
@@ -230,8 +242,10 @@ more into Emacs, the best way to do that is to create my own config!
        :config
        (ivy-mode 1))
 
+     (setq ivy-re-builders-alist '((t . ivy--regex-fuzzy)))
      (setq ivy-use-virtual-buffers t)
      (setq ivy-count-format "(%d/%d) ")
+     (setq projectile-completion-system 'ivy)
 
      (use-package ivy-rich
        :diminish
@@ -270,6 +284,22 @@ more into Emacs, the best way to do that is to create my own config!
 	  '(("IN-PROGRESS" . "green")
 	    ("DO-LATER" . "red")))
 
+    (setq org-log-done 'note)
+    (setq org-agenda-start-with-log-mode '(closed clock state))
+    ;; (setq org-agenda-custom-commands
+    ;;  '(("W" "Weekly review"
+    ;;    agenda ""
+    ;;   ((org-agenda-start-with-log-mode '(closed))
+    ;;   (org-agenda-start-day "-14d")
+    ;;  (org-agenda-span 14)
+    ;; (org-agenda-start-on-weekday 1))
+    ;;("n" "Agenda and all TODOs"
+    ;;agenda ""
+    ;;((alltodo "")))
+    ;;)))
+
+    (setq org-log-into-drawer t)
+    ;;(setq org-src-preserve-indentation t)
   #+end_src
 ** Org-agenda
    #+begin_src emacs-lisp
@@ -316,10 +346,12 @@ more into Emacs, the best way to do that is to create my own config!
   Use Projectile to manage projects in Emacs.
 
   #+begin_src emacs-lisp
-    (use-package projectile
-      :config
-      (projectile-mode +1))
-    ;; (define-key projectile-key-map (kbd "<SPC> p") 'projectile-command-map)
+(use-package projectile
+  :config
+  (projectile-mode +1))
+
+(add-to-map "<SPC> p f" 'projectile-find-file)
+;; (define-key projectile-key-map (kbd "<SPC> p") 'projectile-command-map)
   #+end_src
   
 * CSS and GraphQL in JS
@@ -371,7 +403,14 @@ more into Emacs, the best way to do that is to create my own config!
   #+end_src
 
 
-
+* Editorconfig
+  #+begin_src emacs-lisp
+(use-package editorconfig
+  :ensure t
+  :config
+  (editorconfig-mode 1))
+  #+end_src
+  
 * LSP
 
   #+begin_src emacs-lisp
@@ -399,3 +438,8 @@ more into Emacs, the best way to do that is to create my own config!
   #+end_src
   
 L
+
+
+* TODO Figure out how to make Javascript work in Emacs (mainly JSX)
+  lsp-ui has some nice features, I should add a keybinding for invoking code actions
+  the function to call is ~lsp-ui-sideline-apply-code-actions~
