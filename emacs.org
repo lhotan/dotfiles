@@ -1,8 +1,13 @@
+# -*- eval: (add-hook 'after-save-hook 'org-babel-tangle); -*-
+
 #+TITLE: My Emacs Config
 #+AUTHOR: Michal Lhoťan
 #+PROPERTY: header-args :tangle ./out/emacs
+#+STARTUP: overview
+
 This config will hopefully grow a lot in the future. I really want to get
 more into Emacs, the best way to do that is to create my own config!
+
 * Basic setup
 ** Measure startup performance
    Set higher GC threshold to prevent many GC invocations at startup (GC is slow).
@@ -122,7 +127,18 @@ more into Emacs, the best way to do that is to create my own config!
        :config
        (evil-collection-init))
    #+end_src
-
+   Install and setup undo tree for Emacs and Evil.
+   #+begin_src emacs-lisp
+     (use-package undo-tree
+       :init
+       (setq undo-tree-auto-save-history t)
+       (defadvice undo-tree-make-history-save-file-name
+	   (after undo-tree activate)
+	 (setq ad-return-value (concat ad-return-value ".gz")))
+       :config
+       (global-undo-tree-mode))
+     (evil-set-undo-system 'undo-tree)
+   #+end_src
 ** Doom modeline
    Use the modeline from doom-emacs, it looks good and integrates
    with a lot of packages.
@@ -137,7 +153,7 @@ more into Emacs, the best way to do that is to create my own config!
  #+begin_src emacs-lisp
  (use-package doom-themes
    :config
-   (load-theme 'doom-solarized-dark t)
+   (load-theme 'doom-nord-light t)
   ;; Corrects (and improves) org-mode's native fontification.
    (doom-themes-org-config))
  #+end_src
@@ -299,11 +315,15 @@ more into Emacs, the best way to do that is to create my own config!
     ;;)))
 
     (setq org-log-into-drawer t)
+
+    (use-package adaptive-wrap)
+    (add-hook 'visual-line-mode-hook 'adaptive-wrap-prefix-mode)
+    (add-hook 'org-mode-hook 'visual-line-mode)
     ;;(setq org-src-preserve-indentation t)
   #+end_src
 ** Org-agenda
    #+begin_src emacs-lisp
-   (setq org-agenda-files '("~/Documents/org/"))
+   (setq org-agenda-files '("~/TinyCloud/org/"))
    #+end_src
 
 * Vterm
@@ -355,6 +375,7 @@ more into Emacs, the best way to do that is to create my own config!
   #+end_src
   
 * CSS and GraphQL in JS
+  
   #+begin_src emacs-lisp
     (use-package polymode
       :ensure t)
@@ -373,17 +394,30 @@ more into Emacs, the best way to do that is to create my own config!
       :head-mode 'host
       :tail-mode 'host)
 
-;    (define-innermode poly-js-css-innermode
-;      :mode 'css-mode
-;      :head-matcher "styled\.?.`$"
-;      :tail-matcher "^`;"
-;      :head-mode 'host
-;      :tail-mode 'host)
+					    ;    (define-innermode poly-js-css-innermode
+					    ;      :mode 'css-mode
+					    ;      :head-matcher "styled\.?.`$"
+					    ;      :tail-matcher "^`;"
+					    ;      :head-mode 'host
+					    ;      :tail-mode 'host)
 
     (define-polymode poly-js-mode
       :hostmode 'poly-js-hostmode
       :innermodes '(poly-js-graphql-innermode))
-		   ; poly-js-css-innermode))
+					    ; poly-js-css-innermode))
+    (define-hostmode poly-mdx-hostmode
+      :mode 'markdown-mode)
+    (define-innermode poly-mdx-js-innermode
+      :mode 'rjsx-mode
+      :head-matcher "\n\n<[^/].+[> $]"
+      :tail-matcher "^</.+>\n\n\\|^/>\n\n"
+      :head-mode 'host
+      :tail-mode 'host)
+
+
+    (define-polymode poly-mdx-mode
+      :hostmode 'poly-mdx-hostmode
+      :innermodes '(poly-mdx-js-innermode))
     ;;(add-to-list 'auto-mode-alist '("\\.md" . poly-markdown-mode))
   #+end_src
 * EXWM
@@ -430,7 +464,7 @@ more into Emacs, the best way to do that is to create my own config!
       :init (add-hook 'after-init-hook 'global-company-mode))
 
   #+end_src
-
+  
 * AFTER INIT
   #+begin_src emacs-lisp
     ;; Make gc pauses faster by decreasing the threshold.
@@ -443,3 +477,4 @@ L
 * TODO Figure out how to make Javascript work in Emacs (mainly JSX)
   lsp-ui has some nice features, I should add a keybinding for invoking code actions
   the function to call is ~lsp-ui-sideline-apply-code-actions~
+  
