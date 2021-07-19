@@ -1,5 +1,3 @@
-# -*- eval: (add-hook 'after-save-hook 'org-babel-tangle t t); -*-
-
 #+TITLE: My Emacs Config
 #+AUTHOR: Michal Lhoťan
 #+PROPERTY: header-args :tangle ./out/emacs
@@ -68,6 +66,10 @@ more into Emacs, the best way to do that is to create my own config!
        :config
        (when (memq window-system '(mac ns x))
 	 (exec-path-from-shell-initialize)))
+   #+end_src
+** Make Emacs reload a file upon file system change
+   #+begin_src emacs-lisp
+   (global-auto-revert-mode 1)
    #+end_src
 * Make Emacs useable 
 ** Make Emacs more modern and minimalistic.
@@ -143,7 +145,8 @@ more into Emacs, the best way to do that is to create my own config!
        :config
        (global-undo-tree-mode))
      (evil-set-undo-system 'undo-tree)
-   #+end_src
+     (setq undo-tree-enable-undo-in-region t)
+     #+end_src
 ** Doom modeline
    Use the modeline from doom-emacs, it looks good and integrates
    with a lot of packages.
@@ -165,14 +168,33 @@ more into Emacs, the best way to do that is to create my own config!
 
 ** Fix stupid tab behaviours in Emacs
    #+begin_src emacs-lisp
-     (setq default-tab-width 2)
-     (setq indent-tabs-mode nil)
-     (setq indent-line-function 'insert-tab)
-     ;; make emacs delete entire tab when using backspace
-     (setq backward-delete-char-untabify-method 'hungry)
-     ;; disable indent of previous line when pressing enter
-     (setq-default electric-indent-inhibit t)
+		 (setq-default tab-width 2)
+		 (setq-default indent-tabs-mode nil)
+		 (setq indent-tabs-mode nil)
+		 (setq indent-line-function 'insert-tab)
+		 ;; make emacs delete entire tab when using backspace
+		 (setq backward-delete-char-untabify-method 'hungry)
+		 ;; disable indent of previous line when pressing enter
+		 (setq-default electric-indent-inhibit t)
 
+   #+end_src
+** Emojis!
+ #+begin_src emacs-lisp
+(use-package emojify
+  :hook (after-init . global-emojify-mode))
+ #+end_src
+** Highlight indent levels
+   #+begin_src emacs-lisp
+     (use-package highlight-indent-guides
+       :hook(
+             (css-mode . highlight-indent-guides-mode)
+             (js-mode . highlight-indent-guides-mode)
+             (web-mode . highlight-indent-guides-mode)
+             (typescript-mode . highlight-indent-guides-mode)
+             (org-mode . highlight-indent-guides-mode)
+             )
+       )
+      (setq highlight-indent-guide-method 'bitmap)
    #+end_src
 * Keybinds
 ** Essentials 
@@ -296,7 +318,7 @@ more into Emacs, the best way to do that is to create my own config!
     (setq org-src-tab-acts-natively t)
     (use-package org-bullets
       :custom
-      (org-bullets-bullet-list '("◉" "☯" "○" "☯" "✸" "☯" "✿" "☯" "✜" "☯" "◆" "☯" "▶"))
+      (org-bullets-bullet-list '("◉" "□" "○" "□" "✸" "□" "✿" "□" "✜" "□" "◆" "□" "▸"))
       (org-ellipsis "⤵")
       :hook (org-mode . org-bullets-mode))
     (setq org-todo-keywords
@@ -342,14 +364,19 @@ more into Emacs, the best way to do that is to create my own config!
     ;;(add-to-map "<SPC> '" 'vterm)
   #+end_src
 
-* Magit
+* Version control & Magit
   #+begin_src emacs-lisp
     (use-package magit)
 
     (add-to-map "<SPC> g s" 'magit-status)
     (add-to-map "<SPC> g m" 'magit-dispatch)
   #+end_src
-
+  diff-hl mode acts the same as VScode diff mode, cool!
+  #+begin_src emacs-lisp
+    (use-package diff-hl
+      :config
+      (global-diff-hl-mode))
+  #+end_src
 * Dashboard
   #+begin_src emacs-lisp
     (use-package dashboard
@@ -365,6 +392,7 @@ more into Emacs, the best way to do that is to create my own config!
 
     (setq dashboard-set-heading-icons t)
     (setq dashboard-set-file-icons t)
+    (setq dashboard-startup-banner nil)
   #+end_src
 
 * Projectile
@@ -376,6 +404,7 @@ more into Emacs, the best way to do that is to create my own config!
       (projectile-mode +1))
 
     (add-to-map "<SPC> p f" 'projectile-find-file)
+   
     ;; (define-key projectile-key-map (kbd "<SPC> p") 'projectile-command-map)
   #+end_src
   
@@ -513,7 +542,7 @@ more into Emacs, the best way to do that is to create my own config!
 		(when (string-equal "tsx" (file-name-extension buffer-file-name))
 		  (setup-tide-mode))))
     ;; enable typescript-tslint checker
-    (flycheck-add-mode 'typescript-tslint 'web-mode)
+    (flycheck-add-mode 'javascript-eslint 'web-mode)
   #+end_src
   Javascript support
   #+begin_src emacs-lisp
@@ -532,6 +561,9 @@ more into Emacs, the best way to do that is to create my own config!
     ;; configure jsx-tide checker to run after your default jsx checker
     (flycheck-add-mode 'javascript-eslint 'web-mode)
     ;;(flycheck-add-next-checker 'javascript-eslint 'jsx-tide 'append)
+  #+end_src
+  Eslint
+  #+begin_src emacs-lisp
   #+end_src
 * TODO Figure out how to make Javascript work in Emacs (mainly JSX)
   lsp-ui has some nice features, I should add a keybinding for invoking code actions
