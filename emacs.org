@@ -3,8 +3,7 @@
 #+PROPERTY: header-args :tangle ./out/emacs
 #+STARTUP: overview
 
-This config will hopefully grow a lot in the future. I really want to get
-more into Emacs, the best way to do that is to create my own config!
+This config will hopefully grow a lot in the future. I really want to get more into Emacs, the best way to do that is to create my own config!
 
 * Basic setup
 ** Measure startup performance
@@ -125,6 +124,7 @@ more into Emacs, the best way to do that is to create my own config!
 
      (with-eval-after-load 'evil-maps
        (define-key evil-normal-state-map (kbd "C-n") nil)
+       (define-key evil-normal-state-map (kbd "M-.") nil)
        (define-key evil-normal-state-map (kbd "C-p") nil))
 
    #+end_src
@@ -518,6 +518,7 @@ more into Emacs, the best way to do that is to create my own config!
       (setq flycheck-check-syntax-automatically '(save mode-enabled))
       (eldoc-mode +1)
       (tide-hl-identifier-mode +1)
+      (define-key tide-mode-map  (kbd "M-.") 'tide-fix)
       ;; company is an optional dependency. You have to
       ;; install it separately via package-install
       ;; `M-x package-install [ret] company`
