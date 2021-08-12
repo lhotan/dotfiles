@@ -157,8 +157,7 @@ more into Emacs, the best way to do that is to create my own config!
    #+end_src
 
 ** Doom themes
-   Set up doom-themes, and use solarized 
-   #+begin_src emacs-lisp
+   #+begin_src emacs-lisp :tangle no
      (use-package doom-themes
        :config
        (load-theme 'doom-nord-light t)
@@ -194,7 +193,7 @@ more into Emacs, the best way to do that is to create my own config!
              (org-mode . highlight-indent-guides-mode)
              )
        )
-      (setq highlight-indent-guide-method 'bitmap)
+     (setq highlight-indent-guides-method 'bitmap)
    #+end_src
 * Keybinds
 ** Essentials 
@@ -528,7 +527,7 @@ more into Emacs, the best way to do that is to create my own config!
     (setq company-tooltip-align-annotations t)
 
     ;; formats the buffer before saving
-    ;;(add-hook 'before-save-hook 'tide-format-before-save)
+    (add-hook 'before-save-hook 'prettier-prettify)
 
     (add-hook 'typescript-mode-hook #'setup-tide-mode)
   #+end_src
