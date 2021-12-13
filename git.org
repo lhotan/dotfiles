@@ -11,12 +11,12 @@
   ff = false
 [pull]
   ff = only 
-[includeIf "gitdir:~/Projects/Seznam/"]
-  path = ~/dotfiles/out/gitconfig-seznam
+[includeIf "gitdir:~/Work/StoraEnso/"]
+  path = ~/dotfiles/out/gitconfig-se
 #+end_src
 
-#+begin_src conf :tangle ./out/gitconfig-seznam
+#+begin_src conf :tangle ./out/gitconfig-se
 [user]
   name = michal.lhotan
-  email = michal.lhotan@firma.seznam.cz
+  email = michal.lhotan@storaenso.com
 #+end_src
