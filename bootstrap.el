@@ -1,4 +1,4 @@
-#!/usr/local/bin/emacs --script
+#!/opt/homebrew/opt/emacs-mac --script
 
 (require 'org)
 (load-file "./me.el")
